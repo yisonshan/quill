@@ -12,7 +12,8 @@ lazy val sparkIncludeProp = Option(System.getProperty("spark.include"))
 lazy val modules = Seq[sbt.ClasspathDep[sbt.ProjectReference]](
   `quill-core-jvm`, `quill-core-js`, `quill-sql-jvm`, `quill-sql-js`,
   `quill-jdbc`, `quill-finagle-mysql`, `quill-finagle-postgres`, `quill-async`,
-  `quill-async-mysql`, `quill-async-postgres`, `quill-cassandra`, `quill-orientdb`
+  `quill-async-mysql`, `quill-async-postgres`, `quill-cassandra`, `quill-orientdb`,
+  `quill-ndbc`
 ) ++ 
   Seq[sbt.ClasspathDep[sbt.ProjectReference]](`quill-spark`)
     .filter(_ => sparkIncludeProp.contains("true"))
@@ -160,6 +161,22 @@ lazy val `quill-async-postgres` =
     )
     .dependsOn(`quill-async` % "compile->compile;test->test")
 
+lazy val `quill-ndbc` =
+  (project in file("quill-ndbc"))
+    .settings(commonSettings: _*)
+    .settings(mimaSettings: _*)
+    .settings(
+      fork in Test := true,
+      libraryDependencies ++= Seq(
+        "io.trane" % "future-scala" % "0.3.2",
+        "io.trane" % "ndbc-api" % "0.1.2-SNAPSHOT" changing(),
+        "io.trane" % "ndbc-postgres" % "0.1.2-SNAPSHOT" changing(),
+        ("io.trane" % "ndbc-postgres-netty4" % "0.1.2-SNAPSHOT" changing()) % Test,
+        ("io.trane" % "ndbc-mysql-netty4" % "0.1.2-SNAPSHOT" changing()) % Test
+      )
+    )
+    .dependsOn(`quill-sql-jvm` % "compile->compile;test->test")
+
 lazy val `quill-cassandra` =
   (project in file("quill-cassandra"))
     .settings(commonSettings: _*)
@@ -263,6 +280,7 @@ lazy val commonSettings = ReleasePlugin.extraReleaseCommands ++ Seq(
   organization := "io.getquill",
   scalaVersion := "2.11.12",
   crossScalaVersions := Seq("2.11.12","2.12.6"),
+  resolvers += Resolver.sonatypeRepo("snapshots"),
   libraryDependencies ++= Seq(
     "org.scalamacros" %% "resetallattrs"  % "1.0.0",
     "org.scalatest"   %%% "scalatest"     % "3.0.5"     % Test,

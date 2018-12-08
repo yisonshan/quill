@@ -14,6 +14,7 @@ private[dsl] trait QuotationDsl {
   trait Quoted[+T] {
     def ast: Ast
     def dynamic: Quoted[T] = this
+    override def toString = ast.toString
   }
 
   def quote[T](body: Quoted[T]): Quoted[T] = macro QuotationMacro.doubleQuote[T]

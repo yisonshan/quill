@@ -10,9 +10,10 @@ enablePlugins(TutPlugin)
 lazy val sparkIncludeProp = Option(System.getProperty("spark.include"))
 
 lazy val modules = Seq[sbt.ClasspathDep[sbt.ProjectReference]](
-  `quill-core-jvm`, `quill-core-js`, `quill-sql-jvm`, `quill-sql-js`,
-  `quill-jdbc`, `quill-finagle-mysql`, `quill-finagle-postgres`, `quill-async`,
-  `quill-async-mysql`, `quill-async-postgres`, `quill-cassandra`, `quill-orientdb`
+  `quill-core-jvm`, `quill-core-js`, `quill-querybuilder-jvm`, `quill-querybuilder-js`, 
+  `quill-sql-jvm`, `quill-sql-js`, `quill-jdbc`, `quill-finagle-mysql`, 
+  `quill-finagle-postgres`, `quill-async`, `quill-async-mysql`, `quill-async-postgres`, 
+  `quill-cassandra`, `quill-orientdb`
 ) ++ 
   Seq[sbt.ClasspathDep[sbt.ProjectReference]](`quill-spark`)
     .filter(_ => sparkIncludeProp.contains("true"))
@@ -59,6 +60,18 @@ lazy val `quill-core-jvm` = `quill-core`.jvm
 lazy val `quill-core-js` = `quill-core`.js
 
 lazy val `quill-sql` =
+  crossProject(JVMPlatform, JSPlatform).crossType(superPure)
+    .settings(commonSettings: _*)
+    .settings(mimaSettings: _*)
+    .jsSettings(
+      coverageExcludedPackages := ".*"
+    )
+    .dependsOn(`quill-core` % "compile->compile;test->test")
+
+lazy val `quill-querybuilder-jvm` = `quill-querybuilder`.jvm
+lazy val `quill-querybuilder-js` = `quill-querybuilder`.js
+
+lazy val `quill-querybuilder` =
   crossProject(JVMPlatform, JSPlatform).crossType(superPure)
     .settings(commonSettings: _*)
     .settings(mimaSettings: _*)

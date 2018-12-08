@@ -10,7 +10,7 @@ case class BetaReduction(map: collection.Map[Ast, Ast])
 
       case ast if (map.contains(ast)) =>
         BetaReduction(map - ast - map(ast))(map(ast))
-
+        
       case Property(Tuple(values), name) =>
         val aliases = values.distinct
         aliases match {
